@@ -1,0 +1,16 @@
+[project]
+name = "uv-virtualenvwrapper"
+version = "0.1.0"
+description = "A lightweight virtualenvwrapper replacement for uv"
+readme = "README.md"
+requires-python = ">=3.6"
+license = { file = "LICENSE.txt" }
+authors = [
+    {name = "Jan Lebert", email = "mail@janlebert.com" }
+]
+
+[tool.setuptools]
+script-files = ['uv-virtualenvwrapper.sh']
+
+[project.urls]
+Repository = "https://github.com/sitic/uv-virtualenvwrapper"
