@@ -17,11 +17,23 @@ Provides simple management of named Python virtual environments with tab complet
 ### Method 1: Direct Download
 
 1. **Download the script:**
-   Download [uv-virtualenv-wrapper.sh](uv-virtualenv-wrapper.sh).
-2. **Add to shell config**
+   Download [uv-virtualenvwrapper.sh](uv-virtualenvwrapper.sh).
+2. **Add to shell config:**
     Add
    ```bash
-   source /path/to/uv-virtualenv-wrapper.sh
+   source /path/to/uv-virtualenvwrapper.sh
+   ```
+   to your shell configuration file (`~/.bashrc` or `~/.zshrc`).
+
+### Method 2: Install with `uv`
+1. **Install [uv-virtualenvwrapper](https://pypi.org/project/uv-virtualenvwrapper/)**:
+    ```bash
+    uv tool install uv-virtualenvwrapper
+    ```
+2. **Add to shell config:**
+    Add
+   ```bash
+   source $(which uv-virtualenvwrapper.sh)
    ```
    to your shell configuration file (`~/.bashrc` or `~/.zshrc`).
 
