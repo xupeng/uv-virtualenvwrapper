@@ -1,36 +1,39 @@
 # uv-virtualenvwrapper
 
-A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) when using [uv](https://github.com/astral-sh/uv).
+A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io) when using [uv](https://github.com/astral-sh/uv).
 
-I want to have global named Python virtual environments that I can activate with a single command using tab completion. I also want to be able to create and remove them easily. I used to use virtualenvwrapper for this, but have switched to uv and wanted to replicate the functionality I used in a lightweight script for bash and zsh.
+Provides simple management of named Python virtual environments with tab completion support. Virtual environments are stored in `~/.virtualenvs` by default and can be activated with `workon myenv` anywhere in the filesystem. Only basic functions of virtualenvwrapper are replicated, such as `mkvirtualenv`, `rmvirtualenv`, and `workon`.
 
 ## Features
 
 - `workon`: Activate virtual environments with tab completion
 - `mkvirtualenv`: Create new virtual environments using `uv venv --seed`
 - `rmvirtualenv`: Remove virtual environments
+- Bash and zsh shell support
 - Follows `WORKON_HOME` convention (default: `~/.virtualenvs`)
 
 ## Installation
 
-1. **Install uv**  
-   Follow the [official installation instructions](https://github.com/astral-sh/uv#installation).
+### Method 1: Direct Download
 
+1. **Download the script:**
+   Download [uv-virtualenv-wrapper.sh](uv-virtualenv-wrapper.sh).
 2. **Add to shell config**
+    Add
    ```bash
    source /path/to/uv-virtualenv-wrapper.sh
    ```
-3. **Reload shell**
+   to your shell configuration file (`~/.bashrc` or `~/.zshrc`).
 
 ## Usage
 
 Create a new virtual environment:
 ```bash
-mkvirtualenv --python 3.13 myenv
+mkvirtualenv myenv
 ```
 which is equivalent to this `uv` command:
 ```bash
-uv venv --seed --python 3.13 ~/.virtualenvs/myenv && source ~/.virtualenvs/myenv/bin/activate
+uv venv --seed  ~/.virtualenvs/myenv && source ~/.virtualenvs/myenv/bin/activate
 ```
 All arguments to `mkvirtualenv` are passed to `uv venv --seed`.
 
