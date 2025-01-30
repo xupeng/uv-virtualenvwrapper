@@ -1,4 +1,5 @@
 # uv-virtualenvwrapper
+[![PyPI](https://img.shields.io/pypi/v/uv-virtualenvwrapper.svg)](https://pypi.org/project/uv-virtualenvwrapper/)
 
 A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io) when using [uv](https://github.com/astral-sh/uv).
 
@@ -58,3 +59,7 @@ Now you can activate the virtual environment wherever you are in the filesystem 
 ```bash
 workon myenv
 ```
+
+## Links
+* [GitHub repository](https://github.com/sitic/uv-virtualenvwrapper)
+* [PyPI package](https://pypi.org/project/uv-virtualenvwrapper/)
