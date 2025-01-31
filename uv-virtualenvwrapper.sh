@@ -86,7 +86,7 @@ rmvirtualenv() {
   rm -rf "$venv_path" && echo "Removed virtualenv '$venv_name'"
 }
 
-virtualenvwrapper_show_workon_options() {
+lsvirtualenv() {
   find "$WORKON_HOME" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null
 }
 
@@ -94,14 +94,14 @@ virtualenvwrapper_setup_tab_completion() {
   if [ -n "${BASH:-}" ]; then
     _virtualenvs() {
       local cur="${COMP_WORDS[COMP_CWORD]}"
-      COMPREPLY=($(compgen -W "$(virtualenvwrapper_show_workon_options)" -- "${cur}"))
+      COMPREPLY=($(compgen -W "$(lsvirtualenv)" -- "${cur}"))
     }
     complete -o default -F _virtualenvs workon rmvirtualenv
 
   elif [ -n "${ZSH_VERSION:-}" ]; then
     _virtualenvs() {
       local -a venvs
-      venvs=($(virtualenvwrapper_show_workon_options))
+      venvs=($(lsvirtualenv))
       _describe 'virtualenvs' venvs
     }
     compdef _virtualenvs workon rmvirtualenv

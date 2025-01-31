@@ -1,15 +1,17 @@
-# uv-virtualenvwrapper
 [![PyPI](https://img.shields.io/pypi/v/uv-virtualenvwrapper.svg)](https://pypi.org/project/uv-virtualenvwrapper/)
+
+# uv-virtualenvwrapper
 
 A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io) when using [uv](https://github.com/astral-sh/uv).
 
-Provides simple management of named Python virtual environments with tab completion support. Virtual environments are stored in `~/.virtualenvs` by default and can be activated with `workon myenv` anywhere in the filesystem. Only basic functions of virtualenvwrapper are replicated, such as `mkvirtualenv`, `rmvirtualenv`, and `workon`.
+Provides simple management of named Python virtual environments with tab completion support. [uv](https://github.com/astral-sh/uv) is fantastic, but doesn't provide a way to manage multiple virtual environments in a centralized location ([feature request](https://github.com/astral-sh/uv/issues/1495)). This script provides a simple way to do that like `virtualenvwrapper` did for `venv`. Virtual environments are stored in `~/.virtualenvs` by default and can be activated with `workon myenv` anywhere in the filesystem. Basic functions of virtualenvwrapper are replicated, such as `workon`, `mkvirtualenv`, `rmvirtualenv`, and `lsvirtualenv`. Pre/postactivate hooks are not supported.
 
 ## Features
 
 - `workon`: Activate virtual environments with tab completion
 - `mkvirtualenv`: Create new virtual environments using `uv venv --seed`
 - `rmvirtualenv`: Remove virtual environments
+- `lsvirtualenv`: List all virtual environments
 - Bash and zsh shell support
 - Follows `WORKON_HOME` convention (default: `~/.virtualenvs`)
 
