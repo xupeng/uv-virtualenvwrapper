@@ -1,6 +1,6 @@
 [project]
 name = "uv-virtualenvwrapper"
-version = "1.0.0"
+version = "1.0.1"
 description = "A lightweight virtualenvwrapper replacement for uv"
 readme = "README.md"
 requires-python = ">=3.6"

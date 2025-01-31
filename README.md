@@ -15,7 +15,7 @@ A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.read
 ### Method 1: Direct Download
 
 1. **Download the script:**
-   Download [uv-virtualenvwrapper.sh](uv-virtualenvwrapper.sh).
+   Download [uv-virtualenvwrapper.sh](https://github.com/sitic/uv-virtualenvwrapper/blob/main/uv-virtualenvwrapper.sh).
 2. **Add to shell config:**
     Add
    ```bash
