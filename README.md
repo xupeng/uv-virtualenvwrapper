@@ -1,19 +1,14 @@
-[![PyPI](https://img.shields.io/pypi/v/uv-virtualenvwrapper.svg)](https://pypi.org/project/uv-virtualenvwrapper/)
-
 # uv-virtualenvwrapper
 
 A lightweight replacement for [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io) when using [uv](https://github.com/astral-sh/uv).
 
-Provides simple management of named Python virtual environments with tab completion support. [uv](https://github.com/astral-sh/uv) is fantastic, but doesn't provide a way to manage multiple virtual environments in a centralized location ([feature request](https://github.com/astral-sh/uv/issues/1495)). This script provides a simple way to do that like `virtualenvwrapper` did for `venv`. Virtual environments are stored in `~/.virtualenvs` by default and can be activated with `workon myenv` anywhere in the filesystem. Basic functions of virtualenvwrapper are replicated, such as `workon`, `mkvirtualenv`, `rmvirtualenv`, and `lsvirtualenv`. Pre/postactivate hooks are not supported.
 
-## Features
+## Why uv-virtualenvwrapper?
 
-- `workon`: Activate virtual environments with tab completion
-- `mkvirtualenv`: Create new virtual environments using `uv venv --seed`
-- `rmvirtualenv`: Remove virtual environments
-- `lsvirtualenv`: List all virtual environments
-- Bash and zsh shell support
-- Follows `WORKON_HOME` convention (default: `~/.virtualenvs`)
+[uv](https://github.com/astral-sh/uv) is a fantastic, high-performance tool for managing Python packages and virtual environments. However, it currently lacks a built-in way to easily manage multiple named environments in a centralized location (see [feature request](https://github.com/astral-sh/uv/issues/1495)).
+
+
+`uv-virtualenvwrapper` fills this gap by providing a simple bash/zsh script with tab completion, mirroring the core functionality of virtualenvwrapper specifically for use with uv. It allows for quick creation, activation, removal, and listing of named Python virtual environments. Virtual environments are stored centrally in `~/.virtualenvs` by default and can be activated with `workon <name>`. Pre/postactivate hooks from virtualenvwrapper are not supported.
 
 ## Installation
 
@@ -42,25 +37,30 @@ Provides simple management of named Python virtual environments with tab complet
 
 ## Usage
 
-Create a new virtual environment:
-```bash
-mkvirtualenv myenv
-```
-which is equivalent to this `uv` command:
-```bash
-uv venv --seed  ~/.virtualenvs/myenv && source ~/.virtualenvs/myenv/bin/activate
-```
-All arguments to `mkvirtualenv` are passed to `uv venv --seed`.
+| Command                       | Description                                                                                |
+| :---------------------------- | :----------------------------------------------------------------------------------------- |
+| `mkvirtualenv [options] <name>` | Creates a new virtual environment named `<name>` and activates it. All options are passed to `uv venv --seed`. |
+| `workon [name]`               | Activates the virtual environment named `<name>`. If no name is given, lists available environments. |
+| `rmvirtualenv <name>`          | Removes the virtual environment named `<name>`.                                             |
+| `lsvirtualenv`                 | Lists all available virtual environments.                                                 |
+| `deactivate`                  | Deactivates the current virtual environment. (Standard `venv` command)                      |
 
-Deactivate the virtual environment as usual with:
+Virtual environments are stored in `WORKON_HOME` (default: `~/.virtualenvs`).
+
+Example:
 ```bash
-deactivate
+$ mkvirtualenv myenv
+$ uv pip install requests
+$ deactivate
+
+[...]
+
+$ workon myenv
+$ uv pip list
 ```
 
-Now you can activate the virtual environment wherever you are in the filesystem with:
-```bash
-workon myenv
-```
+## License
+[MIT License](LICENSE.md)
 
 ## Links
 * [GitHub repository](https://github.com/sitic/uv-virtualenvwrapper)

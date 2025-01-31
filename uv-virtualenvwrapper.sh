@@ -10,6 +10,7 @@
 #   mkvirtualenv [uv_venv_args...] <name>
 #   workon <name>
 #   rmvirtualenv <name>
+#   lsvirtualenv
 #
 
 export WORKON_HOME="${WORKON_HOME:-$HOME/.virtualenvs}"
@@ -28,7 +29,7 @@ _mkdir_workon_home() {
 
 workon() {
   if [ $# -eq 0 ]; then
-    virtualenvwrapper_show_workon_options
+    lsvirtualenv
     return 0
   fi
 
@@ -90,7 +91,8 @@ lsvirtualenv() {
   find "$WORKON_HOME" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null
 }
 
-virtualenvwrapper_setup_tab_completion() {
+# Setup tab completion
+__uvvirtualenvwrapper_setup() {
   if [ -n "${BASH:-}" ]; then
     _virtualenvs() {
       local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -107,4 +109,4 @@ virtualenvwrapper_setup_tab_completion() {
     compdef _virtualenvs workon rmvirtualenv
   fi
 }
-virtualenvwrapper_setup_tab_completion
+__uvvirtualenvwrapper_setup
