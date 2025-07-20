@@ -44,75 +44,60 @@ workon() {
     return 1
   fi
 
-  source "$venv_path/$VIRTUALENVWRAPPER_ENV_BIN_DIR/activate"
+  # Check if .project file exists
+  if [ ! -f "$venv_path/.project" ]; then
+    echo "Error: No .project file found for virtualenv '$venv_name'" >&2
+    return 1
+  fi
 
-  # change current directory to the project directory if .project file exists
-  if [ -f "$venv_path/.project" ]; then
-    local project_path
-    project_path=$(cat "$venv_path/.project")
-    if [ -d "$project_path" ]; then
-      cd "$project_path"
+  local project_path
+  project_path=$(cat "$venv_path/.project")
+
+  if [ ! -d "$project_path" ]; then
+    echo "Error: Project directory '$project_path' does not exist" >&2
+    return 1
+  fi
+
+  # Change to project directory
+  cd "$project_path"
+
+  export UV_VIRTUALENV_PROJECT_NAME="$venv_name"
+
+  # Check if .venv exists in project root and activate it
+  local venv_in_project="$project_path/.venv"
+  if [ -d "$venv_in_project" ]; then
+    if [ -f "$venv_in_project/$VIRTUALENVWRAPPER_ENV_BIN_DIR/activate" ]; then
+      source "$venv_in_project/$VIRTUALENVWRAPPER_ENV_BIN_DIR/activate"
     else
-      echo "Warning: Project directory '$project_path' does not exist" >&2
+      echo "Error: .venv directory found but activation script missing" >&2
+      return 1
     fi
   fi
 }
 
 mkvirtualenv() {
-  if [ $# -eq 0 ]; then
-    echo "Usage: mkvirtualenv [uv_venv_args...] [-a PATH] <name>" >&2
+  if [ $# -ne 1 ]; then
+    echo "Usage: mkvirtualenv <name>" >&2
     return 1
   fi
 
-  _mkdir_workon_home
-
-  local venv_name uv_args project_path
-  local args=("$@")
-  local i=0
-  local last_arg_index=$(( $# - 1 ))
-
-  # iterate over all arguments
-  while [ $i -le $last_arg_index ]; do
-    case "${args[$i]}" in
-      -a)
-        if [ $(( i + 1 )) -gt $last_arg_index ]; then
-          echo "Error: -a requires a path argument" >&2
-          return 1
-        fi
-        project_path="${args[$(( i + 1 ))]}"
-        i=$(( i + 2 ))
-        ;;
-      *)
-        if [ $i -eq $last_arg_index ]; then
-          # last argument is the virtual environment name
-          venv_name="${args[$i]}"
-        else
-          # other arguments are uv arguments
-          uv_args+=("${args[$i]}")
-        fi
-        i=$(( i + 1 ))
-        ;;
-    esac
-  done
-
-  if [ -z "$venv_name" ]; then
-    echo "Error: Virtual environment name is required" >&2
-    return 1
-  fi
-
+  local venv_name="$1"
   local venv_path="$WORKON_HOME/$venv_name"
+  local project_path=$(pwd)
 
   if [ -d "$venv_path" ]; then
     echo "Virtualenv '$venv_name' already exists" >&2
     return 1
   fi
 
-  if uv venv "${uv_args[@]}" --seed "$venv_path"; then
-    # if a project path is specified, write it to the .project file
-    if [ -n "$project_path" ]; then
-      echo "$project_path" > "$venv_path/.project"
-    fi
-    workon "$venv_name"
+  _mkdir_workon_home
+
+  # Create only a directory marker instead of actual virtualenv
+  if mkdir -p "$venv_path"; then
+    # Always write current directory to .project file
+    echo "$project_path" > "$venv_path/.project"
+    echo "Created virtualenv marker directory '$venv_name'"
+    echo "Associated with project: $project_path"
   fi
 }
 
@@ -142,18 +127,29 @@ lsvirtualenv() {
 }
 
 cdproject() {
-  if [ -z "$VIRTUAL_ENV" ]; then
+  local venv_name
+  
+  if [ $# -eq 1 ]; then
+    # 如果提供了参数，使用该参数作为 venv name
+    venv_name="$1"
+  elif [ -n "$UV_VIRTUALENV_PROJECT_NAME" ]; then
+    # 如果没有参数，使用当前激活的项目
+    venv_name="$UV_VIRTUALENV_PROJECT_NAME"
+  else
     echo "Error: No virtualenv is currently active" >&2
+    echo "Usage: cdproject [venv_name]" >&2
     return 1
   fi
 
-  if [ ! -f "$VIRTUAL_ENV/.project" ]; then
-    echo "Error: No .project file found in current virtualenv" >&2
+  local venv_path="$WORKON_HOME/$venv_name"
+
+  if [ ! -f "$venv_path/.project" ]; then
+    echo "Error: No .project file found for project '$venv_name'" >&2
     return 1
   fi
 
   local project_path
-  project_path=$(cat "$VIRTUAL_ENV/.project")
+  project_path=$(cat "$venv_path/.project")
 
   if [ ! -d "$project_path" ]; then
     echo "Error: Project directory '$project_path' does not exist" >&2
@@ -194,6 +190,20 @@ cdsitepackages() {
   cd "$site_packages_dir"
 }
 
+updateproject() {
+  if [ -z "$UV_VIRTUALENV_PROJECT_NAME" ]; then
+    echo "Error: No virtualenv is currently active" >&2
+    return 1
+  fi
+
+  local venv_name="$UV_VIRTUALENV_PROJECT_NAME"
+  local project_path=$(pwd)
+  
+  # Write current directory to .project file
+  echo "$project_path" > "$WORKON_HOME/$venv_name/.project"
+  echo "Updated project path for '$venv_name' to: $project_path"
+}
+
 # Setup tab completion
 __uvvirtualenvwrapper_setup() {
   if [ -n "${BASH:-}" ]; then
@@ -201,7 +211,7 @@ __uvvirtualenvwrapper_setup() {
       local cur="${COMP_WORDS[COMP_CWORD]}"
       COMPREPLY=($(compgen -W "$(lsvirtualenv)" -- "${cur}"))
     }
-    complete -o default -F _virtualenvs workon rmvirtualenv cdvirtualenv cdsitepackages cdproject
+    complete -o default -F _virtualenvs workon rmvirtualenv cdvirtualenv cdsitepackages cdproject updateproject
 
   elif [ -n "${ZSH_VERSION:-}" ]; then
     _virtualenvs() {
@@ -209,7 +219,7 @@ __uvvirtualenvwrapper_setup() {
       venvs=($(lsvirtualenv))
       _describe 'virtualenvs' venvs
     }
-    compdef _virtualenvs workon rmvirtualenv cdvirtualenv cdsitepackages cdproject
+    compdef _virtualenvs workon rmvirtualenv cdvirtualenv cdsitepackages cdproject updateproject
   fi
 }
 __uvvirtualenvwrapper_setup
