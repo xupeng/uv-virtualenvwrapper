@@ -2,7 +2,7 @@
 #
 # Author: Jan Lebert
 # License: MIT
-# Project home page: https:://github.com/sitic/uv-virtualenvwrapper
+# Project home page: https://github.com/sitic/uv-virtualenvwrapper
 #
 # Usage:
 #   source uv-virtualenvwrapper.sh
@@ -14,6 +14,7 @@
 #   cdproject
 #   cdvirtualenv
 #   cdsitepackages
+#   updateproject
 #
 
 export WORKON_HOME="${WORKON_HOME:-$HOME/.virtualenvs}"
@@ -27,7 +28,30 @@ then
 fi
 
 _mkdir_workon_home() {
-  mkdir -p "$WORKON_HOME"
+  if ! mkdir -p "$WORKON_HOME" 2>/dev/null; then
+    echo "Error: Cannot create or access WORKON_HOME directory: $WORKON_HOME" >&2
+    return 1
+  fi
+}
+
+_validate_venv_name() {
+  local venv_name="$1"
+  
+  if [ -z "$venv_name" ]; then
+    echo "Error: Environment name cannot be empty" >&2
+    return 1
+  fi
+  
+  # Check for path separators and other problematic characters
+  case "$venv_name" in
+    */*|*\\*|*..*|*\ *|*$'\t'*|*$'\n'*)
+      echo "Error: Environment name '$venv_name' contains invalid characters" >&2
+      echo "Environment names cannot contain: / \\ .. spaces tabs or newlines" >&2
+      return 1
+      ;;
+  esac
+  
+  return 0
 }
 
 workon() {
@@ -37,6 +61,11 @@ workon() {
   fi
 
   local venv_name="$1"
+  
+  if ! _validate_venv_name "$venv_name"; then
+    return 1
+  fi
+  
   local venv_path="$WORKON_HOME/$venv_name"
 
   if [ ! -d "$venv_path" ]; then
@@ -82,6 +111,11 @@ mkvirtualenv() {
   fi
 
   local venv_name="$1"
+  
+  if ! _validate_venv_name "$venv_name"; then
+    return 1
+  fi
+  
   local venv_path="$WORKON_HOME/$venv_name"
   local project_path=$(pwd)
 
@@ -108,6 +142,11 @@ rmvirtualenv() {
   fi
 
   local venv_name="$1"
+  
+  if ! _validate_venv_name "$venv_name"; then
+    return 1
+  fi
+  
   local venv_path="$WORKON_HOME/$venv_name"
 
   if [ ! -d "$venv_path" ]; then
@@ -115,8 +154,10 @@ rmvirtualenv() {
     return 1
   fi
 
-  if [ -n "$VIRTUAL_ENV" ]; then
+  # Deactivate if currently active virtualenv matches the one being removed
+  if [ -n "$VIRTUAL_ENV" ] && [ "$UV_VIRTUALENV_PROJECT_NAME" = "$venv_name" ]; then
     deactivate
+    unset UV_VIRTUALENV_PROJECT_NAME
   fi
 
   rm -rf "$venv_path" && echo "Removed virtualenv '$venv_name'"
@@ -130,10 +171,13 @@ cdproject() {
   local venv_name
   
   if [ $# -eq 1 ]; then
-    # 如果提供了参数，使用该参数作为 venv name
+    # If argument provided, use it as venv name
     venv_name="$1"
+    if ! _validate_venv_name "$venv_name"; then
+      return 1
+    fi
   elif [ -n "$UV_VIRTUALENV_PROJECT_NAME" ]; then
-    # 如果没有参数，使用当前激活的项目
+    # If no argument, use currently active project
     venv_name="$UV_VIRTUALENV_PROJECT_NAME"
   else
     echo "Error: No virtualenv is currently active" >&2
@@ -179,7 +223,7 @@ cdsitepackages() {
   then
     site_packages_dir="$VIRTUAL_ENV/Lib/site-packages"
   else
-    site_packages_dir="$VIRTUAL_ENV/lib/python$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')/site-packages"
+    site_packages_dir="$VIRTUAL_ENV/lib/python$("$VIRTUAL_ENV/$VIRTUALENVWRAPPER_ENV_BIN_DIR/python" -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')/site-packages"
   fi
 
   if [ ! -d "$site_packages_dir" ]; then
